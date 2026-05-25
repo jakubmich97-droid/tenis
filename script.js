@@ -5,11 +5,6 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let matches = [];
 
-
-const STORAGE_KEY = "tennisMatches";
-
-let matches = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-
 const form = document.getElementById("matchForm");
 const table = document.getElementById("matchesTable");
 const statsGrid = document.getElementById("statsGrid");
@@ -17,47 +12,48 @@ const clearBtn = document.getElementById("clearBtn");
 
 const players = ["Kuba", "Filip"];
 
-function saveMatches() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(matches));
-}
-
-function getSetWinner(kubaGames, friendGames) {
-  if (kubaGames > friendGames) return "Kuba";
-  if (friendGames > kubaGames) return "Filip";
+function getSetWinner(kubaGames, filipGames) {
+  if (kubaGames > filipGames) return "Kuba";
+  if (filipGames > kubaGames) return "Filip";
   return null;
 }
 
 function calculateMatch(data) {
   const sets = [
-    [data.kubaSet1, data.friendSet1],
-    [data.kubaSet2, data.friendSet2],
-    [data.kubaSet3, data.friendSet3]
-  ].filter(set => set[0] !== null && set[1] !== null && !Number.isNaN(set[0]) && !Number.isNaN(set[1]));
+    [data.kubaSet1, data.filipSet1],
+    [data.kubaSet2, data.filipSet2],
+    [data.kubaSet3, data.filipSet3]
+  ].filter(set =>
+    set[0] !== null &&
+    set[1] !== null &&
+    !Number.isNaN(set[0]) &&
+    !Number.isNaN(set[1])
+  );
 
   let kubaSets = 0;
-  let friendSets = 0;
+  let filipSets = 0;
   let kubaGames = 0;
-  let friendGames = 0;
+  let filipGames = 0;
 
-  sets.forEach(([kuba, friend]) => {
+  sets.forEach(([kuba, filip]) => {
     kubaGames += kuba;
-    friendGames += friend;
+    filipGames += filip;
 
-    const winner = getSetWinner(kuba, friend);
+    const winner = getSetWinner(kuba, filip);
     if (winner === "Kuba") kubaSets++;
-    if (winner === "Filip") friendSets++;
+    if (winner === "Filip") filipSets++;
   });
 
-  const winner = kubaSets > friendSets ? "Kuba" : "Filip";
-  const score = sets.map(([kuba, friend]) => `${kuba}:${friend}`).join(", ");
+  const winner = kubaSets > filipSets ? "Kuba" : "Filip";
+  const score = sets.map(([kuba, filip]) => `${kuba}:${filip}`).join(", ");
 
   return {
     ...data,
     sets,
     kubaSets,
-    friendSets,
+    filipSets,
     kubaGames,
-    friendGames,
+    filipGames,
     winner,
     score
   };
@@ -93,13 +89,13 @@ function getStats() {
     }
 
     stats.Kuba.setsWon += match.kubaSets;
-    stats.Kuba.setsLost += match.friendSets;
+    stats.Kuba.setsLost += match.filipSets;
     stats.Kuba.gamesWon += match.kubaGames;
-    stats.Kuba.gamesLost += match.friendGames;
+    stats.Kuba.gamesLost += match.filipGames;
 
-    stats.Filip.setsWon += match.friendSets;
+    stats.Filip.setsWon += match.filipSets;
     stats.Filip.setsLost += match.kubaSets;
-    stats.Filip.gamesWon += match.friendGames;
+    stats.Filip.gamesWon += match.filipGames;
     stats.Filip.gamesLost += match.kubaGames;
   });
 
@@ -152,9 +148,9 @@ function renderTable() {
       <td class="winner">${match.winner}</td>
       <td>${match.score}</td>
       <td>${match.kubaSets}</td>
-      <td>${match.friendSets}</td>
+      <td>${match.filipSets}</td>
       <td>${match.kubaGames}</td>
-      <td>${match.friendGames}</td>
+      <td>${match.filipGames}</td>
       <td>${match.note || "-"}</td>
     </tr>
   `).join("");
@@ -165,39 +161,6 @@ function render() {
   renderTable();
 }
 
-form.addEventListener("submit", event => {
-  event.preventDefault();
-
-  const data = {
-    id: crypto.randomUUID(),
-    date: document.getElementById("date").value,
-    surface: document.getElementById("surface").value || "Antuka",
-    kubaSet1: Number(document.getElementById("kubaSet1").value),
-    friendSet1: Number(document.getElementById("friendSet1").value),
-    kubaSet2: Number(document.getElementById("kubaSet2").value),
-    friendSet2: Number(document.getElementById("friendSet2").value),
-    kubaSet3: document.getElementById("kubaSet3").value === "" ? null : Number(document.getElementById("kubaSet3").value),
-    friendSet3: document.getElementById("friendSet3").value === "" ? null : Number(document.getElementById("friendSet3").value),
-    note: document.getElementById("note").value
-  };
-
-  const match = calculateMatch(data);
-
-  await saveMatchToSupabase(match);
-  form.reset();
-
-  document.getElementById("surface").value = "Antuka";
-});
-
-clearBtn.addEventListener("click", () => {
-  if (!confirm("Opravdu chceš smazat všechny zápasy?")) return;
-
-  matches = [];
-  saveMatches();
-  loadMatches();
-});
-
-render();
 async function loadMatches() {
   const { data, error } = await supabaseClient
     .from("tennis_matches")
@@ -206,25 +169,28 @@ async function loadMatches() {
 
   if (error) {
     console.error("Chyba při načítání:", error);
+    alert("Nepodařilo se načíst zápasy ze Supabase.");
     return;
   }
 
-  matches = data.map(match => ({
-    id: match.id,
-    date: match.match_date,
-    surface: match.surface,
-    kubaSet1: match.kuba_set1,
-    filipSet1: match.filip_set1,
-    kubaSet2: match.kuba_set2,
-    filipSet2: match.filip_set2,
-    kubaSet3: match.kuba_set3,
-    filipSet3: match.filip_set3,
-    winner: match.winner,
-    note: match.note
-  }));
+  matches = data.map(match =>
+    calculateMatch({
+      id: match.id,
+      date: match.match_date,
+      surface: match.surface,
+      kubaSet1: match.kuba_set1,
+      filipSet1: match.filip_set1,
+      kubaSet2: match.kuba_set2,
+      filipSet2: match.filip_set2,
+      kubaSet3: match.kuba_set3,
+      filipSet3: match.filip_set3,
+      note: match.note
+    })
+  );
 
   render();
 }
+
 async function saveMatchToSupabase(match) {
   const { error } = await supabaseClient
     .from("tennis_matches")
@@ -249,3 +215,45 @@ async function saveMatchToSupabase(match) {
 
   await loadMatches();
 }
+
+form.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const data = {
+    date: document.getElementById("date").value,
+    surface: document.getElementById("surface").value || "Antuka",
+    kubaSet1: Number(document.getElementById("kubaSet1").value),
+    filipSet1: Number(document.getElementById("filipSet1").value),
+    kubaSet2: Number(document.getElementById("kubaSet2").value),
+    filipSet2: Number(document.getElementById("filipSet2").value),
+    kubaSet3: document.getElementById("kubaSet3").value === "" ? null : Number(document.getElementById("kubaSet3").value),
+    filipSet3: document.getElementById("filipSet3").value === "" ? null : Number(document.getElementById("filipSet3").value),
+    note: document.getElementById("note").value
+  };
+
+  const match = calculateMatch(data);
+
+  await saveMatchToSupabase(match);
+
+  form.reset();
+  document.getElementById("surface").value = "Antuka";
+});
+
+clearBtn.addEventListener("click", async () => {
+  if (!confirm("Opravdu chceš smazat všechny zápasy?")) return;
+
+  const { error } = await supabaseClient
+    .from("tennis_matches")
+    .delete()
+    .neq("id", "00000000-0000-0000-0000-000000000000");
+
+  if (error) {
+    console.error("Chyba při mazání:", error);
+    alert("Zápasy se nepodařilo smazat.");
+    return;
+  }
+
+  await loadMatches();
+});
+
+loadMatches();
