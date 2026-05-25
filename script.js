@@ -7,7 +7,7 @@ const table = document.getElementById("matchesTable");
 const statsGrid = document.getElementById("statsGrid");
 const clearBtn = document.getElementById("clearBtn");
 
-const players = ["Kuba", "Kamarád"];
+const players = ["Kuba", "Filip"];
 
 function saveMatches() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(matches));
@@ -15,7 +15,7 @@ function saveMatches() {
 
 function getSetWinner(kubaGames, friendGames) {
   if (kubaGames > friendGames) return "Kuba";
-  if (friendGames > kubaGames) return "Kamarád";
+  if (friendGames > kubaGames) return "Filip";
   return null;
 }
 
@@ -37,10 +37,10 @@ function calculateMatch(data) {
 
     const winner = getSetWinner(kuba, friend);
     if (winner === "Kuba") kubaSets++;
-    if (winner === "Kamarád") friendSets++;
+    if (winner === "Filip") friendSets++;
   });
 
-  const winner = kubaSets > friendSets ? "Kuba" : "Kamarád";
+  const winner = kubaSets > friendSets ? "Kuba" : "Filip";
   const score = sets.map(([kuba, friend]) => `${kuba}:${friend}`).join(", ");
 
   return {
@@ -65,7 +65,7 @@ function getStats() {
       gamesWon: 0,
       gamesLost: 0
     },
-    Kamarád: {
+    Filip: {
       wins: 0,
       losses: 0,
       setsWon: 0,
@@ -78,9 +78,9 @@ function getStats() {
   matches.forEach(match => {
     if (match.winner === "Kuba") {
       stats.Kuba.wins++;
-      stats.Kamarád.losses++;
+      stats.Filip.losses++;
     } else {
-      stats.Kamarád.wins++;
+      stats.Filip.wins++;
       stats.Kuba.losses++;
     }
 
@@ -89,10 +89,10 @@ function getStats() {
     stats.Kuba.gamesWon += match.kubaGames;
     stats.Kuba.gamesLost += match.friendGames;
 
-    stats.Kamarád.setsWon += match.friendSets;
-    stats.Kamarád.setsLost += match.kubaSets;
-    stats.Kamarád.gamesWon += match.friendGames;
-    stats.Kamarád.gamesLost += match.kubaGames;
+    stats.Filip.setsWon += match.friendSets;
+    stats.Filip.setsLost += match.kubaSets;
+    stats.Filip.gamesWon += match.friendGames;
+    stats.Filip.gamesLost += match.kubaGames;
   });
 
   return stats;
