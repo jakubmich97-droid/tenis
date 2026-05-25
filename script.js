@@ -1,3 +1,11 @@
+const SUPABASE_URL = "TVOJE_SUPABASE_URL";
+const SUPABASE_ANON_KEY = "TVUJ_SUPABASE_ANON_KEY";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let matches = [];
+
+
 const STORAGE_KEY = "tennisMatches";
 
 let matches = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
@@ -175,9 +183,7 @@ form.addEventListener("submit", event => {
 
   const match = calculateMatch(data);
 
-  matches.unshift(match);
-  saveMatches();
-  render();
+  await saveMatchToSupabase(match);
   form.reset();
 
   document.getElementById("surface").value = "Antuka";
@@ -188,7 +194,58 @@ clearBtn.addEventListener("click", () => {
 
   matches = [];
   saveMatches();
-  render();
+  loadMatches();
 });
 
 render();
+async function loadMatches() {
+  const { data, error } = await supabaseClient
+    .from("tennis_matches")
+    .select("*")
+    .order("match_date", { ascending: false });
+
+  if (error) {
+    console.error("Chyba při načítání:", error);
+    return;
+  }
+
+  matches = data.map(match => ({
+    id: match.id,
+    date: match.match_date,
+    surface: match.surface,
+    kubaSet1: match.kuba_set1,
+    filipSet1: match.filip_set1,
+    kubaSet2: match.kuba_set2,
+    filipSet2: match.filip_set2,
+    kubaSet3: match.kuba_set3,
+    filipSet3: match.filip_set3,
+    winner: match.winner,
+    note: match.note
+  }));
+
+  render();
+}
+async function saveMatchToSupabase(match) {
+  const { error } = await supabaseClient
+    .from("tennis_matches")
+    .insert({
+      match_date: match.date,
+      surface: match.surface,
+      kuba_set1: match.kubaSet1,
+      filip_set1: match.filipSet1,
+      kuba_set2: match.kubaSet2,
+      filip_set2: match.filipSet2,
+      kuba_set3: match.kubaSet3,
+      filip_set3: match.filipSet3,
+      winner: match.winner,
+      note: match.note
+    });
+
+  if (error) {
+    console.error("Chyba při ukládání:", error);
+    alert("Zápas se nepodařilo uložit.");
+    return;
+  }
+
+  await loadMatches();
+}
