@@ -8,7 +8,6 @@ let matches = [];
 const form = document.getElementById("matchForm");
 const table = document.getElementById("matchesTable");
 const statsGrid = document.getElementById("statsGrid");
-const clearBtn = document.getElementById("clearBtn");
 
 const players = ["Kuba", "Filip"];
 
@@ -239,21 +238,6 @@ form.addEventListener("submit", async event => {
   document.getElementById("surface").value = "Antuka";
 });
 
-clearBtn.addEventListener("click", async () => {
-  if (!confirm("Opravdu chceš smazat všechny zápasy?")) return;
 
-  const { error } = await supabaseClient
-    .from("tennis_matches")
-    .delete()
-    .neq("id", "00000000-0000-0000-0000-000000000000");
-
-  if (error) {
-    console.error("Chyba při mazání:", error);
-    alert("Zápasy se nepodařilo smazat.");
-    return;
-  }
-
-  await loadMatches();
-});
 
 loadMatches();
