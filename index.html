@@ -24,7 +24,13 @@
       <form id="matchForm">
         <div class="form-grid">
           <input type="date" id="date" required />
-          <input type="text" id="surface" placeholder="Povrch např. antuka" value="Antuka" />
+          
+          <select id="surface">
+            <option value="Antuka">Antuka</option>
+            <option value="Hard">Hard</option>
+            <option value="Umělka">Umělka</option>
+            <option value="Tráva">Tráva</option>
+          </select>
 
           <input type="number" id="kubaSet1" placeholder="Kuba set 1" min="0" required />
           <input type="number" id="filipSet1" placeholder="Filip set 1" min="0" required />
