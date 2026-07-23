@@ -8,8 +8,28 @@ let matches = [];
 const form = document.getElementById("matchForm");
 const table = document.getElementById("matchesTable");
 const statsGrid = document.getElementById("statsGrid");
+const matchSetsSelect = document.getElementById("matchSets");
+const thirdSetInputs = [
+  document.getElementById("kubaSet3"),
+  document.getElementById("filipSet3")
+];
 
 const players = ["Kuba", "Filip"];
+
+function updateSetFields() {
+  const isThreeSetMatch = matchSetsSelect.value === "3";
+
+  thirdSetInputs.forEach(input => {
+    input.hidden = !isThreeSetMatch;
+    input.required = isThreeSetMatch;
+    input.disabled = !isThreeSetMatch;
+
+    if (!isThreeSetMatch) input.value = "";
+  });
+}
+
+matchSetsSelect.addEventListener("change", updateSetFields);
+updateSetFields();
 
 function getSetWinner(kubaGames, filipGames) {
   if (kubaGames > filipGames) return "Kuba";
@@ -225,8 +245,8 @@ form.addEventListener("submit", async event => {
     filipSet1: Number(document.getElementById("filipSet1").value),
     kubaSet2: Number(document.getElementById("kubaSet2").value),
     filipSet2: Number(document.getElementById("filipSet2").value),
-    kubaSet3: document.getElementById("kubaSet3").value === "" ? null : Number(document.getElementById("kubaSet3").value),
-    filipSet3: document.getElementById("filipSet3").value === "" ? null : Number(document.getElementById("filipSet3").value),
+    kubaSet3: matchSetsSelect.value === "3" ? Number(document.getElementById("kubaSet3").value) : null,
+    filipSet3: matchSetsSelect.value === "3" ? Number(document.getElementById("filipSet3").value) : null,
     note: document.getElementById("note").value
   };
 
@@ -236,6 +256,7 @@ form.addEventListener("submit", async event => {
 
   form.reset();
   document.getElementById("surface").value = "Antuka";
+  updateSetFields();
 });
 
 
