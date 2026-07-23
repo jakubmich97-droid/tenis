@@ -127,7 +127,7 @@ function renderStats() {
   statsGrid.innerHTML = players.map(player => {
     const s = stats[player];
     const total = s.wins + s.losses;
-    const winRate = total ? ((s.wins / total) * 100).toFixed(2) : "0.00";
+    const winRate = total ? Math.round((s.wins / total) * 100) : 0;
 
     return `
       <article class="stat-card">
