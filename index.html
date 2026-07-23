@@ -3,23 +3,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tenisová bilance</title>
+  <meta name="theme-color" content="#123d2b" />
+  <title>Kuba vs Filip | Tenisová bilance</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="app">
     <header class="hero">
-      <div>
-        <p class="eyebrow">🎾 Osobní tenisová statistika</p>
-        <h1>Kuba vs Filip</h1>
-        <p>Sleduj výhry, sety, gemy a historii vzájemných zápasů.</p>
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="live-dot"></span> Osobní tenisová statistika</p>
+        <h1>Kuba <span>vs</span> Filip</h1>
+        <p class="hero-text">Každý set se počítá. Sleduj vzájemnou bilanci, formu i historii zápasů.</p>
+      </div>
+      <div class="hero-mark" aria-hidden="true">
+        <div class="tennis-ball"></div>
+        <span>HEAD TO HEAD</span>
       </div>
     </header>
 
+    <div class="section-heading">
+      <div>
+        <p class="section-kicker">Aktuální forma</p>
+        <h2>Vzájemná bilance</h2>
+      </div>
+      <span class="section-icon" aria-hidden="true">🎾</span>
+    </div>
     <section class="stats-grid" id="statsGrid"></section>
 
     <section class="card form-card">
-      <h2>Přidat zápas</h2>
+      <div class="card-heading">
+        <div>
+          <p class="section-kicker">Nový výsledek</p>
+          <h2>Přidat zápas</h2>
+        </div>
+        <span class="step-badge">01</span>
+      </div>
 
       <form id="matchForm">
         <div class="form-grid">
@@ -53,10 +71,14 @@
       </form>
     </section>
 
-    <section class="card">
+    <section class="card history-card">
       <div class="table-head">
-        <h2>Historie zápasů</h2>
-              </div>
+        <div>
+          <p class="section-kicker">Archiv duelů</p>
+          <h2>Historie zápasů</h2>
+        </div>
+        <span class="step-badge">02</span>
+      </div>
 
       <div class="table-wrap">
         <table>
