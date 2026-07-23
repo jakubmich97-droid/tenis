@@ -9,6 +9,10 @@ const form = document.getElementById("matchForm");
 const table = document.getElementById("matchesTable");
 const statsGrid = document.getElementById("statsGrid");
 const matchSetsSelect = document.getElementById("matchSets");
+const submitButton = document.getElementById("submitButton");
+const cancelEditButton = document.getElementById("cancelEditButton");
+const formCard = document.querySelector(".form-card");
+let editingMatchId = null;
 const thirdSetInputs = [
   document.getElementById("kubaSet3"),
   document.getElementById("filipSet3")
@@ -175,6 +179,7 @@ function renderTable() {
       <td data-label="Gemy Kuba">${match.kubaGames}</td>
       <td data-label="Gemy Filip">${match.filipGames}</td>
       <td data-label="Poznámka">${match.note || "-"}</td>
+      <td data-label="Akce"><button type="button" class="edit-match" data-match-id="${match.id}">Upravit</button></td>
     </tr>
   `).join("");
 }
@@ -215,29 +220,77 @@ async function loadMatches() {
 }
 
 async function saveMatchToSupabase(match) {
-  const { error } = await supabaseClient
-    .from("tennis_matches")
-    .insert({
-      match_date: match.date,
-      surface: match.surface,
-      kuba_set1: match.kubaSet1,
-      filip_set1: match.filipSet1,
-      kuba_set2: match.kubaSet2,
-      filip_set2: match.filipSet2,
-      kuba_set3: match.kubaSet3,
-      filip_set3: match.filipSet3,
-      winner: match.winner,
-      note: match.note
-    });
+  const payload = {
+    match_date: match.date,
+    surface: match.surface,
+    kuba_set1: match.kubaSet1,
+    filip_set1: match.filipSet1,
+    kuba_set2: match.kubaSet2,
+    filip_set2: match.filipSet2,
+    kuba_set3: match.kubaSet3,
+    filip_set3: match.filipSet3,
+    winner: match.winner,
+    note: match.note
+  };
+
+  const query = editingMatchId
+    ? supabaseClient.from("tennis_matches").update(payload).eq("id", editingMatchId)
+    : supabaseClient.from("tennis_matches").insert(payload);
+
+  const { error } = await query;
 
   if (error) {
     console.error("Chyba při ukládání:", error);
-    alert("Zápas se nepodařilo uložit.");
-    return;
+    alert(editingMatchId ? "Změny se nepodařilo uložit." : "Zápas se nepodařilo uložit.");
+    return false;
   }
 
   await loadMatches();
+  return true;
 }
+
+function resetMatchForm() {
+  editingMatchId = null;
+  form.reset();
+  matchSetsSelect.value = "2";
+  document.getElementById("surface").value = "Antuka";
+  submitButton.textContent = "Uložit zápas";
+  cancelEditButton.hidden = true;
+  formCard.classList.remove("is-editing");
+  updateSetFields();
+}
+
+function editMatch(matchId) {
+  const match = matches.find(item => String(item.id) === String(matchId));
+  if (!match) return;
+
+  editingMatchId = match.id;
+  const hasThirdSet = match.kubaSet3 !== null && match.filipSet3 !== null;
+
+  matchSetsSelect.value = hasThirdSet ? "3" : "2";
+  updateSetFields();
+  document.getElementById("date").value = match.date;
+  document.getElementById("surface").value = match.surface;
+  document.getElementById("kubaSet1").value = match.kubaSet1;
+  document.getElementById("filipSet1").value = match.filipSet1;
+  document.getElementById("kubaSet2").value = match.kubaSet2;
+  document.getElementById("filipSet2").value = match.filipSet2;
+  document.getElementById("kubaSet3").value = hasThirdSet ? match.kubaSet3 : "";
+  document.getElementById("filipSet3").value = hasThirdSet ? match.filipSet3 : "";
+  document.getElementById("note").value = match.note || "";
+
+  submitButton.textContent = "Uložit změny";
+  cancelEditButton.hidden = false;
+  formCard.classList.add("is-editing");
+  formCard.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+table.addEventListener("click", event => {
+  const editButton = event.target.closest(".edit-match");
+  if (editButton) editMatch(editButton.dataset.matchId);
+});
+
+cancelEditButton.addEventListener("click", resetMatchForm);
 
 form.addEventListener("submit", async event => {
   event.preventDefault();
@@ -256,11 +309,8 @@ form.addEventListener("submit", async event => {
 
   const match = calculateMatch(data);
 
-  await saveMatchToSupabase(match);
-
-  form.reset();
-  document.getElementById("surface").value = "Antuka";
-  updateSetFields();
+  const saved = await saveMatchToSupabase(match);
+  if (saved) resetMatchForm();
 });
 
 
