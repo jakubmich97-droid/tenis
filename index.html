@@ -23,6 +23,11 @@
 
       <form id="matchForm">
         <div class="form-grid">
+          <select id="matchSets" required>
+            <option value="2">Zápas na 2 sety</option>
+            <option value="3">Zápas na 3 sety</option>
+          </select>
+
           <input type="date" id="date" required />
           
           <select id="surface">
@@ -38,8 +43,8 @@
           <input type="number" id="kubaSet2" placeholder="Kuba set 2" min="0" required />
           <input type="number" id="filipSet2" placeholder="Filip set 2" min="0" required />
 
-          <input type="number" id="kubaSet3" placeholder="Kuba set 3 / TB" min="0" />
-          <input type="number" id="filipSet3" placeholder="Filip set 3 / TB" min="0" />
+          <input class="third-set-input" type="number" id="kubaSet3" placeholder="Kuba set 3 / TB" min="0" hidden />
+          <input class="third-set-input" type="number" id="filipSet3" placeholder="Filip set 3 / TB" min="0" hidden />
 
           <input class="wide" type="text" id="note" placeholder="Poznámka např. supertiebreak, vítr, forma..." />
         </div>
