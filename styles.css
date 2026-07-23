@@ -720,3 +720,64 @@ tbody tr:hover {
     transition-duration: 0.01ms !important;
   }
 }
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.secondary-button {
+  color: var(--court);
+  background: transparent;
+  border: 1px solid rgba(18, 61, 43, 0.24);
+  box-shadow: none;
+}
+
+.secondary-button:hover {
+  background: rgba(18, 61, 43, 0.07);
+  box-shadow: none;
+}
+
+.edit-match {
+  min-height: 36px;
+  margin: 0;
+  padding: 0 14px;
+  color: var(--court);
+  background: rgba(216, 255, 62, 0.45);
+  border: 1px solid rgba(18, 61, 43, 0.12);
+  box-shadow: none;
+  font-size: 0.76rem;
+}
+
+.edit-match:hover {
+  box-shadow: 0 7px 18px rgba(18, 61, 43, 0.12);
+}
+
+.form-card.is-editing {
+  outline: 3px solid rgba(216, 255, 62, 0.75);
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .form-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions button {
+    margin-top: 4px;
+  }
+
+  td:nth-child(10) {
+    grid-column: 1 / -1;
+    border-bottom: 0;
+  }
+
+  .edit-match {
+    width: auto;
+    min-height: 40px;
+    margin: 0;
+  }
+}
