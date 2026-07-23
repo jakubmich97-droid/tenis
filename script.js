@@ -159,18 +159,22 @@ function renderStats() {
   }).join("");
 }
 
+function getSurfaceClass(surface) {
+  return `surface-${surface.toLowerCase().replace(/[^a-zá-ž0-9]/gi, "-")}`;
+}
+
 function renderTable() {
   table.innerHTML = matches.map(match => `
     <tr>
-      <td>${match.date}</td>
-      <td>${match.surface}</td>
-      <td class="winner">${match.winner}</td>
-      <td>${match.score}</td>
-      <td>${match.kubaSets}</td>
-      <td>${match.filipSets}</td>
-      <td>${match.kubaGames}</td>
-      <td>${match.filipGames}</td>
-      <td>${match.note || "-"}</td>
+      <td data-label="Datum">${match.date}</td>
+      <td data-label="Povrch"><span class="surface-badge ${getSurfaceClass(match.surface)}">${match.surface}</span></td>
+      <td data-label="Vítěz" class="winner"><span>🏆</span> ${match.winner}</td>
+      <td data-label="Výsledek" class="match-score">${match.score}</td>
+      <td data-label="Sety Kuba">${match.kubaSets}</td>
+      <td data-label="Sety Filip">${match.filipSets}</td>
+      <td data-label="Gemy Kuba">${match.kubaGames}</td>
+      <td data-label="Gemy Filip">${match.filipGames}</td>
+      <td data-label="Poznámka">${match.note || "-"}</td>
     </tr>
   `).join("");
 }
